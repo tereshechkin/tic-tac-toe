@@ -69,6 +69,8 @@ agent.log
 agent_prompt.txt
 agent.py
 agent.txt
+agent_correct_content.py
 
 Content.json
+Content.json.backup
 create_structure.py

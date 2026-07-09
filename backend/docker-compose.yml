@@ -1,0 +1,25 @@
+services:
+  app:
+    image: 89.111.155.230:5000/tic-tac-toe-backend:latest
+    pull_policy: always          # всегда загружать свежий образ из реестра
+    ports:
+      - "8002:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    networks:
+      - internal
+
+  redis:
+    image: redis:alpine
+    # порт не публикуется наружу, доступен только внутри сети
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

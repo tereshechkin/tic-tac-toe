@@ -1,0 +1,1509 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "Tic-Tac-Toe Backend API",
+		"description": "Backend for Tic-Tac-Toe game with LLM opponents",
+		"version": "1.0.0"
+	},
+	"paths": {
+		"/health": {
+			"get": {
+				"summary": "Health Check",
+				"description": "Health check endpoint verifying database and Redis connectivity.",
+				"operationId": "health_check_health_get",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/register": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Register",
+				"description": "Register new user: send verification code to email.",
+				"operationId": "register_api_v1_auth_register_post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserCreate"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/verify-registration": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Verify Registration",
+				"description": "Verify email code and complete registration.",
+				"operationId": "verify_registration_api_v1_auth_verify_registration_post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthVerifyRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthVerifyResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/login": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Login",
+				"description": "Login: send verification code to email.",
+				"operationId": "login_api_v1_auth_login_post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthEmailRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/verify-login": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Verify Login",
+				"description": "Verify email code and get tokens.",
+				"operationId": "verify_login_api_v1_auth_verify_login_post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthVerifyRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthVerifyResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/refresh": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Refresh",
+				"description": "Refresh access token using refresh token.",
+				"operationId": "refresh_api_v1_auth_refresh_post",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/logout": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Logout",
+				"description": "Logout: invalidate access token.",
+				"operationId": "logout_api_v1_auth_logout_post",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/resend-code": {
+			"post": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Resend Code",
+				"description": "Resend verification code.",
+				"operationId": "resend_code_api_v1_auth_resend_code_post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuthEmailRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/verify": {
+			"get": {
+				"tags": [
+					"auth"
+				],
+				"summary": "Verify Token",
+				"description": "Verify access token and return user info.",
+				"operationId": "verify_token_api_v1_auth_verify_get",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/users/profile": {
+			"get": {
+				"tags": [
+					"users"
+				],
+				"summary": "Get Profile",
+				"operationId": "get_profile_api_v1_users_profile_get",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/games": {
+			"post": {
+				"tags": [
+					"games"
+				],
+				"summary": "Create Game",
+				"description": "Create a new game session.",
+				"operationId": "create_game_api_v1_games_post",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GameCreateRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GameCreateResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"tags": [
+					"games"
+				],
+				"summary": "List User Games",
+				"description": "Get list of games for the current user with pagination and filters.",
+				"operationId": "list_user_games_api_v1_games_get",
+				"parameters": [
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"maximum": 100,
+							"minimum": 1,
+							"default": 20,
+							"title": "Limit"
+						}
+					},
+					{
+						"name": "offset",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "integer",
+							"minimum": 0,
+							"default": 0,
+							"title": "Offset"
+						}
+					},
+					{
+						"name": "status",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"anyOf": [
+								{
+									"type": "string",
+									"pattern": "^(waiting|in_progress|finished)$"
+								},
+								{
+									"type": "null"
+								}
+							],
+							"title": "Status"
+						}
+					},
+					{
+						"name": "model_id",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"anyOf": [
+								{
+									"type": "string",
+									"format": "uuid"
+								},
+								{
+									"type": "null"
+								}
+							],
+							"title": "Model Id"
+						}
+					},
+					{
+						"name": "date_from",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"anyOf": [
+								{
+									"type": "string",
+									"format": "date-time"
+								},
+								{
+									"type": "null"
+								}
+							],
+							"title": "Date From"
+						}
+					},
+					{
+						"name": "date_to",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"anyOf": [
+								{
+									"type": "string",
+									"format": "date-time"
+								},
+								{
+									"type": "null"
+								}
+							],
+							"title": "Date To"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GameListResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/games/{session_id}": {
+			"get": {
+				"tags": [
+					"games"
+				],
+				"summary": "Get Game",
+				"description": "Get current game state.",
+				"operationId": "get_game_api_v1_games__session_id__get",
+				"parameters": [
+					{
+						"name": "session_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"title": "Session Id"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GameState"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/games/{session_id}/move": {
+			"post": {
+				"tags": [
+					"games"
+				],
+				"summary": "Make Move",
+				"description": "Make a move in the game.",
+				"operationId": "make_move_api_v1_games__session_id__move_post",
+				"parameters": [
+					{
+						"name": "session_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"title": "Session Id"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MoveRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GameState"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/games/{session_id}/computer-move": {
+			"post": {
+				"tags": [
+					"games"
+				],
+				"summary": "Request Computer Move",
+				"description": "Request computer move (for computer mode).",
+				"operationId": "request_computer_move_api_v1_games__session_id__computer_move_post",
+				"parameters": [
+					{
+						"name": "session_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"title": "Session Id"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GameState"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/games/{session_id}/restart": {
+			"post": {
+				"tags": [
+					"games"
+				],
+				"summary": "Restart Game",
+				"description": "Restart the game with same parameters.",
+				"operationId": "restart_game_api_v1_games__session_id__restart_post",
+				"parameters": [
+					{
+						"name": "session_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"title": "Session Id"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GameState"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/games/{session_id}/exit": {
+			"post": {
+				"tags": [
+					"games"
+				],
+				"summary": "Exit Game",
+				"description": "Exit game (keep state for later).",
+				"operationId": "exit_game_api_v1_games__session_id__exit_post",
+				"parameters": [
+					{
+						"name": "session_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid",
+							"title": "Session Id"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/models": {
+			"get": {
+				"tags": [
+					"models"
+				],
+				"summary": "List Models",
+				"description": "Get list of available LLM models.\n\nReturns all models from the database with their status.",
+				"operationId": "list_models_api_v1_models_get",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ModelListResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"AuthEmailRequest": {
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email",
+						"title": "Email"
+					}
+				},
+				"type": "object",
+				"required": [
+					"email"
+				],
+				"title": "AuthEmailRequest"
+			},
+			"AuthVerifyRequest": {
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email",
+						"title": "Email"
+					},
+					"code": {
+						"type": "string",
+						"maxLength": 6,
+						"minLength": 6,
+						"title": "Code"
+					}
+				},
+				"type": "object",
+				"required": [
+					"email",
+					"code"
+				],
+				"title": "AuthVerifyRequest"
+			},
+			"AuthVerifyResponse": {
+				"properties": {
+					"access_token": {
+						"type": "string",
+						"title": "Access Token"
+					},
+					"refresh_token": {
+						"type": "string",
+						"title": "Refresh Token"
+					},
+					"user": {
+						"$ref": "#/components/schemas/UserResponse"
+					}
+				},
+				"type": "object",
+				"required": [
+					"access_token",
+					"refresh_token",
+					"user"
+				],
+				"title": "AuthVerifyResponse"
+			},
+			"GameCreateRequest": {
+				"properties": {
+					"board_size": {
+						"type": "integer",
+						"enum": [
+							3,
+							5,
+							10,
+							30
+						],
+						"title": "Board Size"
+					},
+					"win_sequence": {
+						"type": "integer",
+						"enum": [
+							3,
+							4,
+							5
+						],
+						"title": "Win Sequence"
+					},
+					"game_mode": {
+						"type": "string",
+						"enum": [
+							"computer",
+							"friend"
+						],
+						"title": "Game Mode"
+					},
+					"model_id": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "uuid"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Model Id"
+					},
+					"difficulty": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"easy",
+									"medium",
+									"hard"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Difficulty"
+					},
+					"player_x_name": {
+						"type": "string",
+						"title": "Player X Name",
+						"default": "Player X"
+					},
+					"player_o_name": {
+						"type": "string",
+						"title": "Player O Name",
+						"default": "Player O"
+					}
+				},
+				"type": "object",
+				"required": [
+					"board_size",
+					"win_sequence",
+					"game_mode"
+				],
+				"title": "GameCreateRequest"
+			},
+			"GameCreateResponse": {
+				"properties": {
+					"session_id": {
+						"type": "string",
+						"format": "uuid",
+						"title": "Session Id"
+					}
+				},
+				"type": "object",
+				"required": [
+					"session_id"
+				],
+				"title": "GameCreateResponse"
+			},
+			"GameListItem": {
+				"properties": {
+					"sessionId": {
+						"type": "string",
+						"format": "uuid",
+						"title": "Sessionid"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"title": "Createdat"
+					},
+					"opponentName": {
+						"type": "string",
+						"title": "Opponentname"
+					},
+					"opponentType": {
+						"type": "string",
+						"enum": [
+							"LLM",
+							"friend"
+						],
+						"title": "Opponenttype"
+					},
+					"boardSize": {
+						"type": "integer",
+						"title": "Boardsize"
+					},
+					"difficulty": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"easy",
+									"medium",
+									"hard"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Difficulty"
+					},
+					"firstMove": {
+						"type": "string",
+						"enum": [
+							"player",
+							"ai",
+							"friend"
+						],
+						"title": "Firstmove"
+					},
+					"currentMove": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"player",
+									"ai",
+									"friend"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Currentmove"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"waiting",
+							"in_progress",
+							"finished"
+						],
+						"title": "Status"
+					},
+					"winner": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"X",
+									"O",
+									"draw"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Winner"
+					},
+					"modelId": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "uuid"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Modelid"
+					},
+					"progress": {
+						"type": "number",
+						"title": "Progress"
+					}
+				},
+				"type": "object",
+				"required": [
+					"sessionId",
+					"createdAt",
+					"opponentName",
+					"opponentType",
+					"boardSize",
+					"firstMove",
+					"status",
+					"progress"
+				],
+				"title": "GameListItem"
+			},
+			"GameListResponse": {
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/GameListItem"
+						},
+						"type": "array",
+						"title": "Items"
+					},
+					"total": {
+						"type": "integer",
+						"title": "Total"
+					},
+					"limit": {
+						"type": "integer",
+						"title": "Limit"
+					},
+					"offset": {
+						"type": "integer",
+						"title": "Offset"
+					}
+				},
+				"type": "object",
+				"required": [
+					"items",
+					"total",
+					"limit",
+					"offset"
+				],
+				"title": "GameListResponse"
+			},
+			"GameState": {
+				"properties": {
+					"session_id": {
+						"type": "string",
+						"format": "uuid",
+						"title": "Session Id"
+					},
+					"board": {
+						"items": {
+							"items": {
+								"anyOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "null"
+									}
+								]
+							},
+							"type": "array"
+						},
+						"type": "array",
+						"title": "Board"
+					},
+					"board_size": {
+						"type": "integer",
+						"title": "Board Size"
+					},
+					"win_sequence": {
+						"type": "integer",
+						"title": "Win Sequence"
+					},
+					"game_mode": {
+						"type": "string",
+						"enum": [
+							"computer",
+							"friend"
+						],
+						"title": "Game Mode"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"waiting",
+							"in_progress",
+							"finished"
+						],
+						"title": "Status"
+					},
+					"current_turn": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"X",
+									"O"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Current Turn"
+					},
+					"player_x_name": {
+						"type": "string",
+						"title": "Player X Name"
+					},
+					"player_o_name": {
+						"type": "string",
+						"title": "Player O Name"
+					},
+					"model_id": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "uuid"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Model Id"
+					},
+					"difficulty": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"easy",
+									"medium",
+									"hard"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Difficulty"
+					},
+					"winner": {
+						"anyOf": [
+							{
+								"type": "string",
+								"enum": [
+									"X",
+									"O",
+									"draw"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Winner"
+					},
+					"winning_cells": {
+						"anyOf": [
+							{
+								"items": {
+									"prefixItems": [
+										{
+											"type": "integer"
+										},
+										{
+											"type": "integer"
+										}
+									],
+									"type": "array",
+									"maxItems": 2,
+									"minItems": 2
+								},
+								"type": "array"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Winning Cells"
+					},
+					"move_count": {
+						"type": "integer",
+						"title": "Move Count",
+						"default": 0
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time",
+						"title": "Created At"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time",
+						"title": "Updated At"
+					},
+					"finished_at": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Finished At"
+					},
+					"move_history": {
+						"items": {
+							"$ref": "#/components/schemas/MoveHistoryItem"
+						},
+						"type": "array",
+						"title": "Move History",
+						"default": []
+					}
+				},
+				"type": "object",
+				"required": [
+					"session_id",
+					"board",
+					"board_size",
+					"win_sequence",
+					"game_mode",
+					"status",
+					"current_turn",
+					"player_x_name",
+					"player_o_name"
+				],
+				"title": "GameState"
+			},
+			"HTTPValidationError": {
+				"properties": {
+					"detail": {
+						"items": {
+							"$ref": "#/components/schemas/ValidationError"
+						},
+						"type": "array",
+						"title": "Detail"
+					}
+				},
+				"type": "object",
+				"title": "HTTPValidationError"
+			},
+			"ModelListResponse": {
+				"properties": {
+					"models": {
+						"items": {
+							"$ref": "#/components/schemas/ModelResponse"
+						},
+						"type": "array",
+						"title": "Models"
+					}
+				},
+				"type": "object",
+				"required": [
+					"models"
+				],
+				"title": "ModelListResponse",
+				"description": "Response schema for list of LLM models."
+			},
+			"ModelResponse": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"title": "Id"
+					},
+					"name": {
+						"type": "string",
+						"title": "Name"
+					},
+					"description": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Description"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"reasoning",
+							"non-reasoning"
+						],
+						"title": "Type"
+					},
+					"enabled": {
+						"type": "boolean",
+						"title": "Enabled"
+					},
+					"manufacturer": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Manufacturer"
+					},
+					"release_date": {
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date"
+							},
+							{
+								"type": "null"
+							}
+						],
+						"title": "Release Date"
+					}
+				},
+				"type": "object",
+				"required": [
+					"id",
+					"name",
+					"type",
+					"enabled"
+				],
+				"title": "ModelResponse",
+				"description": "Response schema for a single LLM model."
+			},
+			"MoveHistoryItem": {
+				"properties": {
+					"player": {
+						"type": "string",
+						"enum": [
+							"X",
+							"O"
+						],
+						"title": "Player"
+					},
+					"row": {
+						"type": "integer",
+						"title": "Row"
+					},
+					"col": {
+						"type": "integer",
+						"title": "Col"
+					},
+					"timestamp": {
+						"type": "string",
+						"format": "date-time",
+						"title": "Timestamp"
+					}
+				},
+				"type": "object",
+				"required": [
+					"player",
+					"row",
+					"col"
+				],
+				"title": "MoveHistoryItem"
+			},
+			"MoveRequest": {
+				"properties": {
+					"session_id": {
+						"type": "string",
+						"format": "uuid",
+						"title": "Session Id"
+					},
+					"player": {
+						"type": "string",
+						"enum": [
+							"X",
+							"O"
+						],
+						"title": "Player"
+					},
+					"row": {
+						"type": "integer",
+						"title": "Row"
+					},
+					"col": {
+						"type": "integer",
+						"title": "Col"
+					}
+				},
+				"type": "object",
+				"required": [
+					"session_id",
+					"player",
+					"row",
+					"col"
+				],
+				"title": "MoveRequest"
+			},
+			"TokenResponse": {
+				"properties": {
+					"access_token": {
+						"type": "string",
+						"title": "Access Token"
+					},
+					"refresh_token": {
+						"type": "string",
+						"title": "Refresh Token"
+					},
+					"token_type": {
+						"type": "string",
+						"title": "Token Type",
+						"default": "bearer"
+					}
+				},
+				"type": "object",
+				"required": [
+					"access_token",
+					"refresh_token"
+				],
+				"title": "TokenResponse"
+			},
+			"UserCreate": {
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email",
+						"title": "Email"
+					},
+					"username": {
+						"type": "string",
+						"maxLength": 100,
+						"minLength": 1,
+						"title": "Username"
+					}
+				},
+				"type": "object",
+				"required": [
+					"email",
+					"username"
+				],
+				"title": "UserCreate"
+			},
+			"UserResponse": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"title": "Id"
+					},
+					"email": {
+						"type": "string",
+						"title": "Email"
+					},
+					"username": {
+						"type": "string",
+						"title": "Username"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time",
+						"title": "Created At"
+					},
+					"theme_preference": {
+						"type": "string",
+						"title": "Theme Preference"
+					}
+				},
+				"type": "object",
+				"required": [
+					"id",
+					"email",
+					"username",
+					"created_at",
+					"theme_preference"
+				],
+				"title": "UserResponse"
+			},
+			"ValidationError": {
+				"properties": {
+					"loc": {
+						"items": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "integer"
+								}
+							]
+						},
+						"type": "array",
+						"title": "Location"
+					},
+					"msg": {
+						"type": "string",
+						"title": "Message"
+					},
+					"type": {
+						"type": "string",
+						"title": "Error Type"
+					},
+					"input": {
+						"title": "Input"
+					},
+					"ctx": {
+						"type": "object",
+						"title": "Context"
+					}
+				},
+				"type": "object",
+				"required": [
+					"loc",
+					"msg",
+					"type"
+				],
+				"title": "ValidationError"
+			}
+		}
+	}
+}
